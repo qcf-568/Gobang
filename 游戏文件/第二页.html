@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>五子棋</title>
+    <style type="text/css">
+    * { font-weight:bold;
+    }
+    canvas {
+        margin: auto;
+        box-shadow: 0 0 20px black;
+        display: block;
+        cursor: pointer;
+    }
+    body{
+        background:url(背景.jpg);
+        background-size:cover;
+        background-repeat:no-repeat;
+    }
+    button {
+        width:30px;
+        height:100px;
+        margin:35px 5px;
+        color:white;
+        background:purple;       
+        padding: 10px 30px;
+        cursor: pointer;
+    }
+    div.left{
+        width: 50px;
+        height: 500px;
+        position: absolute;
+        left:25%;
+        top:0;
+    }
+    div.right{
+        width: 50px;
+        height: 500px;
+        position: absolute;
+        left:72%;
+        top:0;
+    }
+    div.thetime{
+        position: absolute;
+        left: 30%;
+    }
+    p{
+        display: inline;
+        cursor: pointer;
+    }
+    input{
+        display: inline;
+        margin:10px auto;
+        width:30px;
+        cursor: pointer;
+    }
+    @media screen and (max-width:1300px){
+    * { font-weight:bold;
+    }
+    canvas {
+        margin: auto;
+        box-shadow: 0 0 20px black;
+        display: block;
+        cursor: pointer;
+    }
+    body{
+        background:url(背景.jpg);
+        background-size:cover;
+        background-repeat:no-repeat;
+    }
+    button {
+        width:30px;
+        height:100px;
+        margin:35px 5px;
+        color:white;
+        background:purple;       
+        padding: 10px 30px;
+        cursor: pointer;
+    }
+    div.left{
+        width: 50px;
+        height: 500px;
+        position: absolute;
+        left:15%;
+        top:0;
+    }
+    div.right{
+        width: 50px;
+        height: 500px;
+        position: absolute;
+        left:81%;
+        top:0;
+    }
+    div.thetime{
+        position: absolute;
+        left: 30%;
+    }
+    p{
+        display: inline;
+        cursor: pointer;
+    }
+    input{
+        display: inline;
+        margin:10px auto;
+        width:30px;
+        cursor: pointer;
+    }
+    }
+    </style>
+    </head>
+    <body id="body">
+    <canvas id="canvas1" width="520px" height="520px" ></canvas>
+    <audio  id="sound" src="棋子音效b.mp3"></audio>
+    <div class="left">
+    <button type="button" onclick="restart()">重新开始</button>
+    <button type="button" id="button2" onclick="usekey()">键盘模式</button>
+    <button type="button" id="button3" onclick="toregert(e)">悔棋一下</button>
+    </div>
+    <div class="right">
+    <button type="button" id="button4" onclick="bybj()">不要背景</button>
+    <button type="button" onclick="window.location.href='游戏介绍.html'">游戏介绍</button>
+    <button type="button" id="button6" onclick="bybs()">不要步数</button>
+    </div>
+    <div class="button">
+    <div class="thetime">
+    <p>本步已经用时</p>
+    <input type="text" id="txt" readonly="readonly">
+    <p>秒</p>
+    <p>本局游戏已经用时</p>
+    <input type="text" id="txt2" readonly="readonly">
+    <p>秒 &nbsp;请</p>
+    <input type="text" id="txt3" readonly="readonly" value="黑">
+    <p>棋落子</p>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+            var myVar = setInterval(function(){ drawcanvas () }, 100);
+            var ing = true;//游戏是否进行中
+            var black = true;//换色功能
+            var canreg = false; //悔棋功能
+            var yaobs = true;//步数记录器
+            var mouse = true;//判断是鼠标还是键盘下棋
+            var game = [];//棋盘状态记录
+            var ccc = 0;//两个计时参数
+            var ccc2 = 0;
+            var g = 0;
+            var m = 0;
+            var n = 0;
+            for (m = 0; m <= 14; m++) {
+                 game[m] = [];
+                 for (n = 0; n <= 14; n++) {
+                      game[m][n] = 0;
+                }
+            }
+            var bsb = 1;//黑棋步数记录
+            var bsw = 1;//白棋步数记录
+            var tie = 0;//平局记录器
+            var getcanvas = document.getElementById("canvas1");
+            var drawit = getcanvas.getContext('2d');
+            canvas1.onclick = function(e){//鼠标控制落子的函数
+                                  if (ing) {
+                                      X = e.offsetX;
+                                      Y = e.offsetY;
+                                      x = Math.floor(X / 35);
+                                      y = Math.floor(Y / 35);
+                                          if (game[x][y] == 0) {
+                                              drop(x,y,black);
+                                              document.getElementById('sound').play();
+                                              judge5(x,y);
+                                              stopCount();
+                                              canreg = true;
+                                              mouse = true;
+                                              black = !black;
+                                          }
+                                          else {alert("此处已经有棋子！")
+                                          }
+                                  }
+                                  else {alert("请重新开始")
+                                  }
+                              } 
+            function drawcanvas () { 
+                     drawit.beginPath();
+                     drawit.moveTo(15 + g * 35 , 15);
+                     drawit.lineTo(15 + g * 35 , 505);
+                     drawit.stroke();
+                     drawit.beginPath();
+                     drawit.moveTo(15 , 15 + g * 35);
+                     drawit.lineTo(505 , 15 + g * 35);
+                     drawit.stroke();
+                     g = g + 1; 
+            }
+            //以下三个范围限制函数
+            function t0 (tt) {
+                if (tt-4>=0) {
+                    return tt-4;
+                }
+                else {
+                    return 0;
+                }
+            }
+            function t14 (ttt) {
+                if (ttt+4<=14) {
+                    return ttt+4;
+                }
+                else {
+                    return 14;
+                }
+            }
+            function ok (we) {
+                if(0<=we && we<=14) {
+                      return true;
+                }
+                else{
+                      return false;   
+                }   
+            }
+            function drop (x,y,black) {
+                drawit.beginPath();
+                drawit.arc(15 + x * 35, 15 + y * 35, 16, 0, 2 * Math.PI);
+                drawit.closePath();
+                var drawgrad = drawit.createRadialGradient(15 + x * 35 , 15 + y * 35 , 15, 10 + x * 35 , 10 + y * 35 , 0);
+                if (black) {
+                    drawgrad.addColorStop(0,'black');
+                    drawgrad.addColorStop(1,'white');
+                    game[x][y] = 1;
+                    document.getElementById('txt3').value="白";
+                    
+                }
+                else {
+                    drawgrad.addColorStop(0,'pink');
+                    drawgrad.addColorStop(1,'white');
+                    game[x][y] = -1;
+                    document.getElementById('txt3').value="黑";
+                }
+                drawit.fillStyle = drawgrad;
+                drawit.fill();
+                if (black && yaobs) {
+                    drawit.font = "bold 20px Arial";
+                    drawit.fillStyle = "red";
+                    drawit.fillText(bsb, 5 + x * 35, 15 + y * 35);
+                    bsb = bsb + 1;
+                }
+                if (!black && yaobs) {
+                    drawit.font = "bold 20px Arial";
+                    drawit.fillStyle = "red";
+                    drawit.fillText(bsw, 5 + x * 35, 15 + y * 35);
+                    bsw = bsw + 1;
+                }
+                tie = tie + 1;
+            }
+            function judge5 (x,y) { //用来寻找有利于胜利的棋子
+                var heng = [];
+                var shu = [];
+                var fudui = [];
+                var zhudui = [];
+                for (w = t0(x); w<= t14(x); w= w + 1) {     
+                     for (e = t0(y); e <= t14(y); e= e + 1) {   
+                          if (e == y) { 
+                              heng[w] = game[w][e];
+                          }
+                          if (w == x) { 
+                              shu[e] = game[w][e];
+                          }
+                     } 
+                }
+                for (var t = 0; t <= 4; t = t+1) {
+                     var zuo = x - t;
+                     var you = x + t;
+                     var shang = y - t;
+                     var xia = y + t;
+                     if (ok(zuo) && ok(xia)) {
+                         fudui[zuo] = game[zuo][xia];
+                     }
+                     if (ok(you) && ok(shang)) {
+                         fudui[you] = game[you][shang];
+                     }
+                     if (ok(zuo) && ok(shang)) {
+                         zhudui[zuo] = game[zuo][shang];               
+                     }
+                     if (ok(you) && ok(xia)) {
+                         zhudui[you] = game[you][xia];               
+                     }
+                }
+                get5(heng, x);
+                get5(shu, y);
+                get5(fudui, x);
+                get5(zhudui, x);
+            }
+            function get5 (line, loca) {//用来判断胜利
+                num1 = 5;
+                num2 = 5;
+                addl = loca + 1;
+                if (black) {
+                  while(num1 > 0) {
+                        if(line[loca]>0 && loca>=0) {
+                           num1 = num1 - 1;
+                           loca = loca - 1;
+                        }
+                        else {
+                          break;
+                        }
+                  }
+                  while(num1 > 0) {
+                        if(line[addl]>0) {
+                           num1 = num1 - 1;
+                           addl = addl + 1;
+                        }
+                        else {
+                          break;
+                        }
+                  }
+                  if (num1 == 0) {
+                        drawit.font = "bold 100px Arial";
+                        drawit.fillStyle = "red";
+                        drawit.fillText("黑棋胜利!!!", 0, 250);
+                        alert("黑棋胜利");
+                        ing = false;
+                  }  
+                }
+                else {
+                  while(num2 > 0) {
+                        if(line[loca]<0 && loca>=0) {
+                           num2 = num2 - 1;
+                           loca = loca - 1;
+                        }
+                        else {
+                          break;
+                        }
+                  }
+                  while(num2 > 0) {
+                        if(line[addl]<0) {
+                           num2 = num2 - 1;
+                           addl = addl + 1;
+                        }
+                        else {
+                          break;
+                        }
+                  }
+                  if (num2 == 0) {
+                        drawit.font = "bold 100px Arial";
+                        drawit.fillStyle = "red";
+                        drawit.fillText("白棋胜利!!!", 0, 250);
+                        alert("白棋胜利");
+                        ing = false;
+                  }
+                }
+                if (tie == 225 && num1 !== 0 && num2 !== 0){
+                         drawit.font = "bold 100px Arial";
+                         drawit.fillStyle = "red";
+                         drawit.fillText("天那，平局了!", 0, 250);
+                         alert("天那，平局了!");
+                         ing = false;
+                }
+            }
+            //下列十个函数控制重新开始、悔棋、计时、计步开关等功能
+            function restart () {
+                window.location.reload()
+            }
+            function toregert (e) {
+                document.getElementById("button3").blur()//所有button的blur是为了防止焦点选中后对键盘操作的影响
+                if (!canreg || !ing) {
+                    alert("不能悔棋！");
+                    return;
+                }
+                if (!mouse) {
+                    alert("请敲击键盘h键悔棋");
+                    return;
+                }
+                regret (x,y);
+                if (!black) {
+                    bsb = bsb - 1;
+                    document.getElementById('txt3').value="黑";
+                }
+                if (black) {
+                    bsw = bsw - 1;
+                    document.getElementById('txt3').value="白";
+                }
+                black = !black;
+                canreg = false;
+            }        
+            function regret (x,y) {
+                game[x][y] = 0;
+                game[ii][jj] = 0;
+                tie = tie - 1;
+                drawit.clearRect((x) * 35-1, (y) * 35-1, 35, 35);
+                drawit.beginPath();
+                drawit.moveTo(15+x*35 , y*35-1);
+                drawit.lineTo(15+x*35 , y*35+34);
+                drawit.moveTo(x*35-1, y*35+15);
+                drawit.lineTo((x+1)*35-1 , y*35+15);
+                drawit.stroke();
+            }
+            function keytoregert (hqii,hqjj) {
+                if (!canreg || !ing) {
+                    alert("不能悔棋！");
+                    return;
+                }
+                if (mouse) {
+                    alert("请用鼠标进行悔棋");
+                    return;
+                }
+                keyregret (hqii,hqjj);
+                if (!black) {
+                    bsb = bsb - 1;
+                    document.getElementById('txt3').value="黑";
+                }
+                if (black) {
+                    bsw = bsw - 1;
+                    document.getElementById('txt3').value="白";
+                }
+                black = !black;
+                canreg = false;
+            }        
+            function keyregret (hqii,hqjj) {
+                game[hqii][hqjj] = 0;
+                tie = tie - 1;
+                drawit.clearRect((hqii) * 35-1, (hqjj) * 35-1, 35, 35);
+                drawit.beginPath();
+                drawit.moveTo(15+hqii*35 , hqjj*35-1);
+                drawit.lineTo(15+hqii*35 , hqjj*35+34);
+                drawit.moveTo(hqii*35-1, hqjj*35+15);
+                drawit.lineTo((hqii+1)*35-1 , hqjj*35+15);
+                drawit.stroke();
+            }    
+            function timedCount () {
+                document.getElementById('txt').value=ccc
+                ccc=ccc+1
+                setTimeout("timedCount()",1000)
+            }  
+            function timedCount2 () {
+                document.getElementById('txt2').value=ccc2
+                ccc2=ccc2+1
+                setTimeout("timedCount2()",1000)
+            }
+            function stopCount () {
+                ccc=0;
+                setTimeout("document.getElementById('txt').value=0",0);
+            }
+            timedCount ();
+            timedCount2 ();
+            function bybs () {
+                yaobs = false;
+                document.getElementById("button6").blur()
+            }
+            function bybj () {
+              document.getElementById("body").style.background="none";
+              document.getElementById("button4").blur()
+            }
+            setTimeout("clearInterval(myVar);",2500)//考虑到setinterval的不稳定性，划线多1秒，而界面显示无变化
+            function usekey () {
+              document.getElementById("button2").blur()
+              alert("请用wasd或者上下左右控制光标移动，用回车或空格控制落子，h键控制对键盘落下棋子的悔棋");
+            }
+            //以下是键盘监听功能系列
+            var i = 264;//2个光标参数
+            var j = 254;
+            var ii = 7;//2个落子参数
+            var jj = 7;
+            var hqii = 7;//用来配合键盘悔棋的参数
+            var hqjj = 7;
+            document.onkeydown=function(event){
+              if (!ing) {return;}
+                  if(event.keyCode == 13 || event.keyCode == 32){ 
+                      if (game[ii][jj] == 0) {
+                                              drop(ii,jj,black);
+                                              document.getElementById('sound').play();
+                                              judge5(ii,jj);
+                                              stopCount();
+                                              canreg = true;
+                                              mouse = false;
+                                              black = !black;
+                                              hqii = ii;
+                                              hqjj = jj;
+                                              }
+                      else {alert("此处已经有棋子！");    
+                      }
+                  }
+              if(event.keyCode == 40 || event.keyCode == 83){
+                if (ok(jj+1)) {
+                    i = i + 35;
+                    jj = jj + 1;
+                    drawit.clearRect(j+17.5, i-27.5, 10, 10);
+                    drawit.clearRect(j-17.5, i-27.5, 10, 10);
+                    drawit.clearRect(j+17.5, i-62.5, 10, 10);
+                    drawit.clearRect(j-17.5, i-62.5, 10, 10);
+                    drawit.clearRect(j+17.5, i-97.5, 10, 10);
+                    drawit.clearRect(j-17.5, i-97.5, 10, 10);
+                    drawit.font = "bold 12px Arial";
+                    drawit.fillStyle = "red";
+                    drawit.fillText("↖",j+17.5,i+17.5);
+                    drawit.fillText("↗",j-17.5,i+17.5);
+                    drawit.fillText("↙",j+17.5,i-17.5);
+                    drawit.fillText("↘",j-17.5,i-17.5);
+                }
+                else {return;}
+              }
+              if(event.keyCode == 38 || event.keyCode == 87){
+                if (ok(jj-1)) {
+                    i = i - 35;
+                    jj = jj - 1;
+                    drawit.clearRect(j+17.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j-17.5, i-27.5, 10, 10);
+                    drawit.clearRect(j+17.5, i-27.5, 10, 10);
+                    drawit.clearRect(j-17.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j+17.5, i+42.5, 10, 10);
+                    drawit.clearRect(j-17.5, i+42.5, 10, 10);
+                    drawit.font = "bold 12px Arial";
+                    drawit.fillStyle = "red";
+                    drawit.fillText("↖",j+17.5,i+17.5);
+                    drawit.fillText("↗",j-17.5,i+17.5);
+                    drawit.fillText("↙",j+17.5,i-17.5);
+                    drawit.fillText("↘",j-17.5,i-17.5);
+                }
+                else {return;}
+              }
+              if(event.keyCode == 37 || event.keyCode == 65){
+                if (ok(ii-1)){
+                    j = j - 35;
+                    ii = ii - 1;
+                    drawit.clearRect(j+52.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j+17.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j+52.5, i-27.5, 10, 10);
+                    drawit.clearRect(j+17.5, i-27.5, 10, 10);
+                    drawit.clearRect(j+87.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j+87.5, i-27.5, 10, 10);
+                    drawit.font = "bold 12px Arial";
+                    drawit.fillStyle = "red";
+                    drawit.fillText("↖",j+17.5,i+17.5);
+                    drawit.fillText("↗",j-17.5,i+17.5);
+                    drawit.fillText("↙",j+17.5,i-17.5);
+                    drawit.fillText("↘",j-17.5,i-17.5);
+                }
+                else {return;}
+              }
+              if(event.keyCode == 39 || event.keyCode == 68){
+                if (ok(ii+1)){
+                    j = j + 35;
+                    ii = ii + 1;
+                    drawit.clearRect(j-17.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j-52.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j-17.5, i-27.5, 10, 10);
+                    drawit.clearRect(j-52.5, i-27.5, 10, 10);
+                    drawit.clearRect(j-52.5, i+ 7.5, 10, 10);
+                    drawit.clearRect(j-52.5, i-27.5, 10, 10);
+                    drawit.font = "bold 12px Arial";
+                    drawit.fillStyle = "red";
+                    drawit.fillText("↖",j+17.5,i+17.5);
+                    drawit.fillText("↗",j-17.5,i+17.5);
+                    drawit.fillText("↙",j+17.5,i-17.5);
+                    drawit.fillText("↘",j-17.5,i-17.5);
+                }
+                else {return;}
+              }
+              if(event.keyCode == 72){
+                keytoregert (hqii,hqjj)
+              }
+            }
+        </script>
+    </body>
+</html>
